@@ -1,9 +1,11 @@
 #!/bin/bash
 
-echo "Distribution: Ubuntu"
-echo "Radius Server"
-echo "Installation and configure"
-echo "with Sql DataBase"
+echo "############################################"
+echo "########### Distribution: Ubuntu ###########"
+echo "###########     Radius Server    ###########"
+echo "######## Installation and configure ########"
+echo "###########   with Sql DataBase  ###########"
+echo "############################################"
 
 
 ###########################################################
