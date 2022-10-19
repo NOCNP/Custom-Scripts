@@ -46,23 +46,25 @@ sudo apt full-upgrade -y
 
 sed -i '/mods-enabled\/sql/s/^#//' /etc/freeradius/3.0/radiusd.conf
 
-sed -i '/dialect =/s/sqlite/mysql/' /etc/freeradius/3.0/mods-available/sql
 
-sed -i '/rlm_sql_null/s/^/#/' /etc/freeradius/3.0/mods-available/sql
+#### Below Lines are completed in one line. ##### [Now Commenting the section]
 
-sed -i '/driver = "rlm_sql_${dialect}"/s/^#//' /etc/freeradius/3.0/mods-available/sql
+#sed -i '/dialect =/s/sqlite/mysql/' /etc/freeradius/3.0/mods-available/sql
+#sed -i '/rlm_sql_null/s/^/#/' /etc/freeradius/3.0/mods-available/sql
+#sed -i '/driver = "rlm_sql_${dialect}"/s/^#//' /etc/freeradius/3.0/mods-available/sql
+#sed -i -e '70,82s/^/#/' -e '86,96s/^/#/' -e '104,113s/^/#/' -e '139,157s/^/#/' /etc/freeradius/3.0/mods-available/sql
+#sed -i -e '/server = "localhost"/s/^#//' -e '/port = 3306/s/^#//' -e '/login/s/^#//' -e '/radpass/s/^#//' /etc/freeradius/3.0/mods-available/sql
+#sed -i '/read_clients/s/^#//' /etc/freeradius/3.0/mods-available/sql
 
-sed -i -e '70,82s/^/#/' -e '86,96s/^/#/' -e '104,113s/^/#/' -e '139,157s/^/#/' /etc/freeradius/3.0/mods-available/sql
+#### The Single line section Ends here. #####
 
-sed -i -e '/server = "localhost"/s/^#//' -e '/port = 3306/s/^#//' -e '/login/s/^#//' -e '/radpass/s/^#//' /etc/freeradius/3.0/mods-available/sql
-
-sed -i '/read_clients/s/^#//' /etc/freeradius/3.0/mods-available/sql
-
+########### mods-available/sql file configure ###########
 sed -i -e '/dialect =/s/sqlite/mysql/' -e '/rlm_sql_null/s/^/#/' -e '/driver = "rlm_sql_${dialect}"/s/^#//' -e '70,82s/^/#/' -e '86,96s/^/#/' -e '104,113s/^/#/' -e '139,157s/^/#/' -e '/server = "localhost"/s/^#//' -e '/port = 3306/s/^#//' -e '/login/s/^#//' -e '/radpass/s/^#//' -e '/read_clients/s/^#//' /etc/freeradius/3.0/mods-available/sql
 
+########### mods-available/sqlcounter Configure ###########
 Sed -i '$ a \\nsqlcounter accessperiod {\n\tsql_module_instance = sql\n\t# dialect = ${modules.sql.dialect}\n\tdialect = mysql\n\n\tcounter_name = Max-Access-Period-Time\n\tcheck_name = Mmietech-Period\n\tkey = User-Name\n\treset = never\n\n\t$INCLUDE ${modconfdir}/sql/counter/${dialect}/${.:instance}.conf\n}\n\nsqlcounter quotalimit {\n\tsql_module_instance = sql\n\t# dialect = ${modules.sql.dialect}\n\tdialect = mysql\n\n\tcounter_name = Max-Volume\n\tcheck_name = Max-Data\n\treply_name = Mikrotik-Total-Limit\n\tkey = User-Name\n\treset = never\n\n\t$INCLUDE ${modconfdir}/sql/counter/${dialect}/${.:instance}.conf\n}' /etc/freeradius/3.0/mods-available/sqlcounter
 
-
+########### Adding mods-config/sql/counter/mysql/accessperiod.conf ###########
 cat << EOF > accessperiod.conf
 query = "\\
         SELECT UNIX_TIMESTAMP() - UNIX_TIMESTAMP(AcctStartTime) \\
@@ -71,7 +73,7 @@ query = "\\
         ORDER BY AcctStartTime LIMIT 1"
 EOF
 
-
+########### Adding mods-config/sql/counter/mysql/quotalimit.conf ###########
 cat << EOF > quotalimit.conf
 query = "\\
         SELECT (SUM(acctinputoctets) + SUM(acctoutputoctets)) \\
@@ -79,10 +81,10 @@ query = "\\
         WHERE UserName='%{${key}}'"
 EOF
 
-
+########### Uncommenting all 'sql' line/words ###########
 sed -i '/sql/s/-sql/sql/' /etc/freeradius/3.0/sites-available/default
 sed -i '/sql/s/^#//' /etc/freeradius/3.0/sites-available/default
 
 
-
+########### Adding noresetcounter, totalquota, accessperiod, quotalimit in the default file ###########
 sed -i '487 i # MmieTech Custom Module. \n#        noresetcounter\n#       totalquota\n#        accessperiod\n#        quotalimit' /etc/freeradius/3.0/sites-available/default
