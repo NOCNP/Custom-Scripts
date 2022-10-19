@@ -64,8 +64,11 @@ sed -i -e '/dialect =/s/sqlite/mysql/' -e '/rlm_sql_null/s/^/#/' -e '/driver = "
 ########### mods-available/sqlcounter Configure ###########
 Sed -i '$ a \\nsqlcounter accessperiod {\n\tsql_module_instance = sql\n\t# dialect = ${modules.sql.dialect}\n\tdialect = mysql\n\n\tcounter_name = Max-Access-Period-Time\n\tcheck_name = Mmietech-Period\n\tkey = User-Name\n\treset = never\n\n\t$INCLUDE ${modconfdir}/sql/counter/${dialect}/${.:instance}.conf\n}\n\nsqlcounter quotalimit {\n\tsql_module_instance = sql\n\t# dialect = ${modules.sql.dialect}\n\tdialect = mysql\n\n\tcounter_name = Max-Volume\n\tcheck_name = Max-Data\n\treply_name = Mikrotik-Total-Limit\n\tkey = User-Name\n\treset = never\n\n\t$INCLUDE ${modconfdir}/sql/counter/${dialect}/${.:instance}.conf\n}' /etc/freeradius/3.0/mods-available/sqlcounter
 
+########### Adding nasidentifier in the schema.sql file ###########
+sed -e "/^  delegatedipv6prefix /a \  nasidentifier varchar\(50\) NOT NULL default ''," /etc/freeradius/3.0/mods-config/sql/main/mysql/schema.sql
+
 ########### Adding mods-config/sql/counter/mysql/accessperiod.conf ###########
-cat << EOF > accessperiod.conf
+cat << EOF > /etc/freeradius/3.0/mods-config/sql/counter/mysql/accessperiod.conf
 query = "\\
         SELECT UNIX_TIMESTAMP() - UNIX_TIMESTAMP(AcctStartTime) \\
         FROM radacct \\
@@ -74,7 +77,7 @@ query = "\\
 EOF
 
 ########### Adding mods-config/sql/counter/mysql/quotalimit.conf ###########
-cat << EOF > quotalimit.conf
+cat << EOF > /etc/freeradius/3.0/mods-config/sql/counter/mysql/quotalimit.conf
 query = "\\
         SELECT (SUM(acctinputoctets) + SUM(acctoutputoctets)) \\
         FROM radacct \\
